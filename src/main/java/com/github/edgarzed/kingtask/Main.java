@@ -4,7 +4,7 @@ import java.io.IOException;
 
 public class Main {
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) throws IOException {
 
         int size = readInt();
 
@@ -16,22 +16,6 @@ public class Main {
                 matrix[j][i] = readInt();
             }
         }
-
-        /*computeMatrix(size, matrix, computedMatrix);
-
-        for (int i = 0; i < size; i++) {
-            for (int j = 0; j < size; j++) {
-                System.out.print(matrix[j][i] + " ");
-            }
-            System.out.println();
-        }
-        System.out.println("***");
-        for (int i = 0; i < size; i++) {
-            for (int j = 0; j < size; j++) {
-                System.out.print(computedMatrix[j][i] + " ");
-            }
-            System.out.println();
-        }*/
 
         int lastRequestType = 2;
         int requestNum = readInt();
@@ -46,7 +30,7 @@ public class Main {
                 int x2 = readInt();
                 int y2 = readInt();
                 System.out.println(calculateArea(computedMatrix, x1, y1, x2, y2));
-            } else if (requestType == 2){
+            } else if (requestType == 2) {
                 int x = readInt();
                 int y = readInt();
                 int value = readInt();
@@ -73,29 +57,23 @@ public class Main {
         return negative ? result * -1 : result;
     }
 
-    /*s(lowerRow, rightColumn) - s(upperRow - 1, rightColumn) - s(lowerRow, leftColumn - 1) + s(upperRow - 1, leftColumn - 1)
-     * (x1,y1) [top-left coordinate] and (x2,y2) [bottom-right coordinate]
-     * */
     private static long calculateArea(long[][] computedMatrix, int x1, int y1, int x2, int y2) {
-        long a = computedMatrix[x1][y1];
-        long b = computedMatrix[x2-x1][y2];
-        long c = computedMatrix[x2][y2-y1];
-        long d = computedMatrix[x2][y2];
-
-        return d+a-b-c;
+        long result;
+        if (x1 == 0 && y1 == 0) {
+            result = computedMatrix[x2][y2];
+        } else if (x1 == 0) {
+            result = computedMatrix[x2][y1 + y2] - computedMatrix[x2][y1 - 1];
+        } else if (y1 == 0) {
+            result = computedMatrix[x1 + x2][y2] - computedMatrix[x1 - 1][y2];
+        } else {
+            result = computedMatrix[x1 - 1][y1 - 1] + computedMatrix[x2][y2] - computedMatrix[x2][y1 - 1] - computedMatrix[x1 - 1][y2];
+        }
+        return result;
     }
 
     private static void computeMatrix(int size, int[][] matrix, long[][] computedMatrix) {
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
-                /*computedMatrix[i + 1][j + 1] = matrix[i][j] +
-                        computedMatrix[i + 1][j] +
-                        computedMatrix[i][j + 1] -
-                        computedMatrix[i][j];*/
-                /*computedMatrix[i][j] = matrix[i][j] +
-                        computedMatrix[i - 1][j] +
-                        computedMatrix[i][j - 1] -
-                        computedMatrix[i-1][j-1];*/
                 if (i > 0 && j > 0) {
                     computedMatrix[i][j] = matrix[i][j] + computedMatrix[i - 1][j] + computedMatrix[i][j - 1] - computedMatrix[i - 1][j - 1];
                 } else if (i > 0) {
