@@ -1,10 +1,16 @@
 package com.github.edgarzed.kingtask;
 
 import java.io.IOException;
-import java.util.stream.IntStream;
+import java.util.ArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 public class Main {
     public static void main(String[] args) throws Exception {
+        ExecutorService executorService = Executors.newFixedThreadPool(2);
+        ArrayList<Future> futures = new ArrayList<>();
+
         int size = readInt();
         int[][] matrix = new int[size][size];
         for (int i = 0; i < size; i++) {
@@ -13,32 +19,40 @@ public class Main {
             }
         }
         int requestNum = readInt();
-        int[] requestParams = new int[5];
+        int[] requestParams = new int[4];
         for (int i = 0; i < requestNum; i++) {
             int requestType = readInt();
             if (requestType == 1) {
-                for (int j = 0; j < 4; j++) {
-                    requestParams[j] = readInt();
-                }
-                sum(matrix, requestParams);
+                int y1 = readInt();
+                int x1 = readInt();
+                int y2 = readInt();
+                int x2 = readInt();
+                futures.add(executorService.submit(() -> sum(matrix, x1, y1, x2, y2)));
             } else {
+                for (Future future : futures) {
+                    while (!future.isDone()){
+
+                    }
+                }
+                futures.clear();
                 for (int j = 0; j < 3; j++) {
                     requestParams[j] = readInt();
                 }
                 modify(matrix, requestParams);
             }
         }
+        for (Future future : futures) {
+            while (!future.isDone()){
+
+            }
+        }
     }
 
-    private static void sum(int[][] matrix, int[] requestParams) {
-        int x1 = requestParams[1];
-        int y1 = requestParams[0];
-        int x2 = requestParams[3];
-        int y2 = requestParams[2];
-        long result = IntStream.range(x1, x2+1)
-                .parallel()
-                .mapToLong(operand -> sumLine(matrix[operand], requestParams[0], requestParams[2]))
-                .sum();
+    private static void sum(int[][] matrix, int x1, int y1, int x2, int y2) {
+        long result = 0;
+        for (; x1 <= x2; x1++) {
+            result += sumLine(matrix[x1], y1, y2);
+        }
         System.out.println(result);
     }
 
