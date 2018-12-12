@@ -1,23 +1,23 @@
 package com.github.edgarzed.kingtask;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 public class Main {
+
     public static void main(String[] args) throws Exception {
-        ExecutorService executorService = Executors.newFixedThreadPool(2);
-        ArrayList<Future> futures = new ArrayList<>();
 
         int size = readInt();
+
         int[][] matrix = new int[size][size];
+        long[][] computedMatrix = new long[size + 1][size + 1];
+
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
-                matrix[i][j] = readInt();
+                matrix[j][i] = readInt();
             }
         }
+        computeMatrix(size, matrix, computedMatrix);
+
         int requestNum = readInt();
         int[] requestParams = new int[4];
         for (int i = 0; i < requestNum; i++) {
@@ -27,41 +27,15 @@ public class Main {
                 int x1 = readInt();
                 int y2 = readInt();
                 int x2 = readInt();
-                futures.add(executorService.submit(() -> sum(matrix, x1, y1, x2, y2)));
+                System.out.println(calculateArea(computedMatrix, x1, y1, x2, y2));
             } else {
-                for (Future future : futures) {
-                    while (!future.isDone()){
-
-                    }
-                }
-                futures.clear();
                 for (int j = 0; j < 3; j++) {
                     requestParams[j] = readInt();
                 }
                 modify(matrix, requestParams);
+                computeMatrix(size, matrix, computedMatrix);
             }
         }
-        for (Future future : futures) {
-            while (!future.isDone()){
-
-            }
-        }
-    }
-
-    private static void sum(int[][] matrix, int x1, int y1, int x2, int y2) {
-        long result = 0;
-        for (; x1 <= x2; x1++) {
-            result += sumLine(matrix[x1], y1, y2);
-        }
-        System.out.println(result);
-    }
-
-    private static long sumLine(int[] line, int y1, int y2) {
-        long result = 0;
-        for (; y1 <= y2; y1++) {
-            result += line[y1];
-        }
-        return result;
     }
 
     private static void modify(int[][] matrix, int[] requestParams) {
@@ -88,4 +62,26 @@ public class Main {
         return negative ? result * -1 : result;
     }
 
+    /*s(lowerRow, rightColumn) - s(upperRow - 1, rightColumn) - s(lowerRow, leftColumn - 1) + s(upperRow - 1, leftColumn - 1)
+     * (x1,y1) [top-left coordinate] and (x2,y2) [bottom-right coordinate]
+     * */
+    private static long calculateArea(long[][] computedMatrix, int x1, int y1, int x2, int y2) {
+        long A = computedMatrix[y1][x1];
+        long B = computedMatrix[y1][x2];
+        long C = computedMatrix[y2][x2];
+        long D = computedMatrix[y2][x1];
+
+        return A + C - B - D;
+    }
+
+    private static void computeMatrix(int size, int[][] matrix, long[][] computedMatrix) {
+        for (int y = 0; y < size; y++) {
+            for (int x = 0; x < size; x++) {
+                computedMatrix[y + 1][x + 1] = matrix[y][x] +
+                        computedMatrix[y + 1][x] +
+                        computedMatrix[y][x + 1] -
+                        computedMatrix[y][x];
+            }
+        }
+    }
 }
