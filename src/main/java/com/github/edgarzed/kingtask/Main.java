@@ -1,29 +1,29 @@
 package com.github.edgarzed.kingtask;
 
-import java.util.Scanner;
+import java.io.IOException;
+import java.util.stream.IntStream;
 
 public class Main {
-    public static void main(String[] args) {
-        Scanner in = new Scanner(System.in);
-        int size = in.nextInt();
+    public static void main(String[] args) throws Exception {
+        int size = readInt();
         int[][] matrix = new int[size][size];
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
-                matrix[i][j] = in.nextInt();
+                matrix[i][j] = readInt();
             }
         }
-        int requestNum = in.nextInt();
+        int requestNum = readInt();
         int[] requestParams = new int[5];
         for (int i = 0; i < requestNum; i++) {
-            int requestType = in.nextInt();
+            int requestType = readInt();
             if (requestType == 1) {
                 for (int j = 0; j < 4; j++) {
-                    requestParams[j] = in.nextInt();
+                    requestParams[j] = readInt();
                 }
                 sum(matrix, requestParams);
             } else {
                 for (int j = 0; j < 3; j++) {
-                    requestParams[j] = in.nextInt();
+                    requestParams[j] = readInt();
                 }
                 modify(matrix, requestParams);
             }
@@ -35,11 +35,10 @@ public class Main {
         int y1 = requestParams[0];
         int x2 = requestParams[3];
         int y2 = requestParams[2];
-
-        long result = 0;
-        for (; x1 <= x2; x1++) {
-            result += sumLine(matrix[x1], y1, y2);
-        }
+        long result = IntStream.range(x1, x2+1)
+                .parallel()
+                .mapToLong(operand -> sumLine(matrix[operand], requestParams[0], requestParams[2]))
+                .sum();
         System.out.println(result);
     }
 
@@ -57,4 +56,22 @@ public class Main {
         int value = requestParams[2];
         matrix[x][y] = value;
     }
+
+    private static int readInt() throws IOException {
+        int result = 0;
+        boolean digital = false;
+        boolean negative = false;
+        for (int ch = 0; (ch = System.in.read()) != -1; ) {
+            if (ch >= '0' && ch <= '9') {
+                digital = true;
+                result = result * 10 + ch - '0';
+            } else if (ch == '-') {
+                negative = true;
+            } else if (digital) {
+                break;
+            }
+        }
+        return negative ? result * -1 : result;
+    }
+
 }
