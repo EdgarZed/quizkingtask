@@ -12,7 +12,7 @@ import java.io.PrintStream;
 import static org.junit.Assert.assertEquals;
 
 public class MainTest {
-    private final String data = "4\n" +
+    /*private final String data = "4\n" +
             "-1 -5 1 2\n" +
             "1 2 3 4\n" +
             "5 6 7 8\n" +
@@ -22,7 +22,23 @@ public class MainTest {
             "1 1 1 2 1\n" +
             "2 0 0 2\n" +
             "1 0 0 0 0\n" +
-            "1 0 0 3 3\n";
+            "1 0 0 3 3\n";*/
+
+    private final String data = "3\n" +
+            "0 1 4\n" +
+            "2 3 2\n" +
+            "1 2 7\n" +
+            "11\n" +
+            "1 1 1 2 2\n"+
+            "2 2 2 0\n"+
+            "2 0 0 0\n"+
+            "2 1 0 0\n"+
+            "2 2 0 0\n"+
+            "2 0 1 0\n"+
+            "2 0 2 0\n"+
+            "1 1 1 2 2\n"+
+            "2 2 2 7\n"+
+            "1 1 1 2 2\n";
 
     private final ByteArrayInputStream inContent = new ByteArrayInputStream(data.getBytes());
     private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
@@ -44,6 +60,7 @@ public class MainTest {
     @Test
     public void shouldAnswerWithTrue() throws Exception {
         Main.main(null);
-        assertEquals("-1\n5\n2\n78\n", outContent.toString());
+//        assertEquals("-1\r\n5\r\n2\r\n78\r\n", outContent.toString());
+        assertEquals("14\r\n7\r\n14\r\n", outContent.toString());
     }
 }

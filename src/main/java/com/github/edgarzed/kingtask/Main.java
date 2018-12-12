@@ -9,40 +9,51 @@ public class Main {
         int size = readInt();
 
         int[][] matrix = new int[size][size];
-        long[][] computedMatrix = new long[size + 1][size + 1];
+        long[][] computedMatrix = new long[size][size];
 
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
                 matrix[j][i] = readInt();
             }
         }
-        computeMatrix(size, matrix, computedMatrix);
 
+        /*computeMatrix(size, matrix, computedMatrix);
+
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
+                System.out.print(matrix[j][i] + " ");
+            }
+            System.out.println();
+        }
+        System.out.println("***");
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
+                System.out.print(computedMatrix[j][i] + " ");
+            }
+            System.out.println();
+        }*/
+
+        int lastRequestType = 2;
         int requestNum = readInt();
-        int[] requestParams = new int[4];
         for (int i = 0; i < requestNum; i++) {
             int requestType = readInt();
             if (requestType == 1) {
-                int y1 = readInt();
-                int x1 = readInt();
-                int y2 = readInt();
-                int x2 = readInt();
-                System.out.println(calculateArea(computedMatrix, x1, y1, x2, y2));
-            } else {
-                for (int j = 0; j < 3; j++) {
-                    requestParams[j] = readInt();
+                if (lastRequestType == 2) {
+                    computeMatrix(size, matrix, computedMatrix);
                 }
-                modify(matrix, requestParams);
-                computeMatrix(size, matrix, computedMatrix);
+                int x1 = readInt();
+                int y1 = readInt();
+                int x2 = readInt();
+                int y2 = readInt();
+                System.out.println(calculateArea(computedMatrix, x1, y1, x2, y2));
+            } else if (requestType == 2){
+                int x = readInt();
+                int y = readInt();
+                int value = readInt();
+                matrix[y][x] = value;
             }
+            lastRequestType = requestType;
         }
-    }
-
-    private static void modify(int[][] matrix, int[] requestParams) {
-        int x = requestParams[1];
-        int y = requestParams[0];
-        int value = requestParams[2];
-        matrix[x][y] = value;
     }
 
     private static int readInt() throws IOException {
@@ -66,21 +77,34 @@ public class Main {
      * (x1,y1) [top-left coordinate] and (x2,y2) [bottom-right coordinate]
      * */
     private static long calculateArea(long[][] computedMatrix, int x1, int y1, int x2, int y2) {
-        long A = computedMatrix[y1][x1];
-        long B = computedMatrix[y1][x2];
-        long C = computedMatrix[y2][x2];
-        long D = computedMatrix[y2][x1];
+        long a = computedMatrix[x1][y1];
+        long b = computedMatrix[x2-x1][y2];
+        long c = computedMatrix[x2][y2-y1];
+        long d = computedMatrix[x2][y2];
 
-        return A + C - B - D;
+        return d+a-b-c;
     }
 
     private static void computeMatrix(int size, int[][] matrix, long[][] computedMatrix) {
-        for (int y = 0; y < size; y++) {
-            for (int x = 0; x < size; x++) {
-                computedMatrix[y + 1][x + 1] = matrix[y][x] +
-                        computedMatrix[y + 1][x] +
-                        computedMatrix[y][x + 1] -
-                        computedMatrix[y][x];
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
+                /*computedMatrix[i + 1][j + 1] = matrix[i][j] +
+                        computedMatrix[i + 1][j] +
+                        computedMatrix[i][j + 1] -
+                        computedMatrix[i][j];*/
+                /*computedMatrix[i][j] = matrix[i][j] +
+                        computedMatrix[i - 1][j] +
+                        computedMatrix[i][j - 1] -
+                        computedMatrix[i-1][j-1];*/
+                if (i > 0 && j > 0) {
+                    computedMatrix[i][j] = matrix[i][j] + computedMatrix[i - 1][j] + computedMatrix[i][j - 1] - computedMatrix[i - 1][j - 1];
+                } else if (i > 0) {
+                    computedMatrix[i][j] = matrix[i][j] + computedMatrix[i - 1][j];
+                } else if (j > 0) {
+                    computedMatrix[i][j] = matrix[i][j] + computedMatrix[i][j - 1];
+                } else {
+                    computedMatrix[i][j] = matrix[i][j];
+                }
             }
         }
     }
