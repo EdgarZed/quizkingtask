@@ -4,7 +4,10 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.io.PrintStream;
 
 import static org.junit.Assert.assertEquals;
 
@@ -39,7 +42,7 @@ public class MainTest {
     }
 
     @Test
-    public void shouldAnswerWithTrue() throws IOException {
+    public void shouldAnswerWithTrue() throws Exception {
         Main.main(null);
         assertEquals("-1\n5\n2\n78\n", outContent.toString());
     }
