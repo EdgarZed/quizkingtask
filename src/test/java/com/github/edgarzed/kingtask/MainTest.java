@@ -17,8 +17,10 @@ public class MainTest {
             "1 2 3 4\n" +
             "5 6 7 8\n" +
             "9 10 11 12\n" +
-            "6\n" +
+            "8\n" +
+            "1 0 0 3 0\n" +
             "1 0 0 0 0\n" +
+            "1 3 3 3 3\n" +
             "1 1 1 2 1\n" +
             "2 0 0 2\n" +
             "1 0 0 0 0\n" +
@@ -62,7 +64,7 @@ public class MainTest {
     @Test
     public void shouldAnswerWithTrue() throws Exception {
         Main.main(null);
-        assertEquals("-1\r\n5\r\n2\r\n14\r\n78\r\n", outContent.toString());
+        assertEquals("-3\n-1\n12\n5\n2\n14\n78\n", outContent.toString());
 //        assertEquals("14\r\n5\r\n5\r\n14\r\n", outContent.toString());
     }
 }
