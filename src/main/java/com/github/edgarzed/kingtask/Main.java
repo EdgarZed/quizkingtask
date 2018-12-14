@@ -20,20 +20,6 @@ public class Main {
         }
         Future<?> submit = executorService.submit(() -> computeSATMatrix(matrix, satMatrix));
 
-        /*for (int i = 0; i < size; i++) {
-            for (int j = 0; j < size; j++) {
-                System.out.print(matrix[j][i] + " ");
-            }
-            System.out.println();
-        }
-        System.out.println("***");
-        for (int i = 0; i < size; i++) {
-            for (int j = 0; j < size; j++) {
-                System.out.print(satMatrix[j][i] + " ");
-            }
-            System.out.println();
-        }*/
-
         int[][] requests = getRequests();
         while (!submit.isDone()) {
             Thread.sleep(1);
@@ -47,7 +33,7 @@ public class Main {
                 long result = calculateArea(satMatrix, requests[i][1], requests[i][2], requests[i][3], requests[i][4]);
                 System.out.println(result);
             } else {
-                matrix[requests[i][2]][requests[i][1]] = requests[i][3];
+                matrix[requests[i][1]][requests[i][2]] = requests[i][3];
             }
             lastRequestType = requests[i][0];
         }
