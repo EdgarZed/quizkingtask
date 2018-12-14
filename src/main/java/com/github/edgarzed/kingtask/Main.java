@@ -1,15 +1,10 @@
 package com.github.edgarzed.kingtask;
 
 import java.io.IOException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 public class Main {
 
     public static void main(String[] args) throws Exception {
-        ExecutorService executorService = Executors.newSingleThreadExecutor();
-
         int size = readInt();
         int[][] matrix = new int[size][size];
         long[][] satMatrix = new long[size][size];
@@ -18,42 +13,45 @@ public class Main {
                 matrix[j][i] = readInt();
             }
         }
-        Future<?> submit = executorService.submit(() -> computeSATMatrix(matrix, satMatrix));
 
-        int[][] requests = getRequests();
-        while (!submit.isDone()) {
-            Thread.sleep(1);
-        }
+        computeSATMatrix(matrix, satMatrix, 0);
+
+        int[][] requests = new int[readInt()][5];
+        int lastSumRequest = getLastSumRequestAndFillMatrix(requests);
         int lastRequestType = 1;
-        for (int i = 0; i < requests.length; i++) {
+
+        for (int i = 0; i < lastSumRequest; i++) {
             if (requests[i][0] == 1) {
                 if (lastRequestType == 2) {
-                    computeSATMatrix(matrix, satMatrix);
+                    int start = requests[i - 1][1] < requests[i - 1][2] ? requests[i - 1][1] : requests[i - 1][2];
+                    start = start > 0 ? start - 1 : start;
+                    computeSATMatrix(matrix, satMatrix, start);
                 }
                 long result = calculateArea(satMatrix, requests[i][1], requests[i][2], requests[i][3], requests[i][4]);
                 System.out.println(result);
-            } else {
+            } else if (requests[i][0] == 2) {
                 matrix[requests[i][1]][requests[i][2]] = requests[i][3];
             }
             lastRequestType = requests[i][0];
         }
     }
 
-    private static int[][] getRequests() throws IOException {
-        int[][] requests = new int[readInt()][5];
+    private static int getLastSumRequestAndFillMatrix(int[][] requests) throws IOException {
+        int lastSumRequest = 0;
         for (int i = 0; i < requests.length; i++) {
             requests[i][0] = readInt();
             if (requests[i][0] == 1) {
                 for (int j = 1; j < 5; j++) {
                     requests[i][j] = readInt();
                 }
+                lastSumRequest = i;
             } else {
                 for (int j = 1; j < 4; j++) {
                     requests[i][j] = readInt();
                 }
             }
         }
-        return requests;
+        return lastSumRequest > 0 ? lastSumRequest + 1 : 0;
     }
 
     private static int readInt() throws IOException {
@@ -91,9 +89,9 @@ public class Main {
         return res;
     }
 
-    private static void computeSATMatrix(int[][] matrix, long[][] computedMatrix) {
-        for (int x = 0; x < matrix.length; x++) {
-            for (int y = 0; y < matrix.length; y++) {
+    private static void computeSATMatrix(int[][] matrix, long[][] computedMatrix, int start) {
+        for (int x = start; x < matrix.length; x++) {
+            for (int y = start; y < matrix.length; y++) {
                 if (x > 0 && y > 0) {
                     computedMatrix[x][y] = matrix[x][y] + computedMatrix[x - 1][y] + computedMatrix[x][y - 1] - computedMatrix[x - 1][y - 1];
                 } else if (x > 0) {
