@@ -12,48 +12,52 @@ public class Main {
                 matrix[i][j] = readInt();
             }
         }
-        int requestNum = readInt();
-        int[][] requestHistory = new int[requestNum][5];
-        long[] sumResults = new long[requestNum];
-        int lastModifyRequest = 0;
-        boolean foundSumResult = false;
+        int requestAmt = readInt();
+        int[][] requestHistory = new int[requestAmt][5];
+        long[] sumResults = new long[requestAmt];
 
-        for (int i = 0; i < requestNum; i++) {
+        for (int i = 0; i < requestAmt; i++) {
             requestHistory[i][0] = readInt();
             if (requestHistory[i][0] == 1) {
-                for (int j = 1; j < 5; j++) {
-                    requestHistory[i][j] = readInt();
-                }
-                for (int j = i - 1; j > lastModifyRequest; j--) {
-                    if (Arrays.equals(requestHistory[i], requestHistory[j])) {
-                        sumResults[i] = sumResults[j];
-                        foundSumResult = true;
-                        break;
-                    }
-                }
-                if (!foundSumResult) {
-                    sumResults[i] = sum(matrix, requestHistory[i]);
-                }
-                foundSumResult = false;
+                sum(matrix, requestHistory, i, sumResults);
                 System.out.println(sumResults[i]);
             } else {
-                for (int j = 1; j < 4; j++) {
-                    requestHistory[i][j] = readInt();
-                }
                 modify(matrix, requestHistory[i]);
-                lastModifyRequest = i;
             }
         }
     }
 
-    private static long sum(int[][] matrix, int[] requestParams) {
-        int x1 = requestParams[2];
-        int y1 = requestParams[1];
-        int x2 = requestParams[4];
-        int y2 = requestParams[3];
-        long result = 0;
-        for (; x1 <= x2; x1++) {
-            result += sumLine(matrix[x1], y1, y2);
+    private static void sum(int[][] matrix, int[][] requestHistory, int requestNum, long[] sumResults) throws IOException {
+        for (int j = 1; j < 5; j++) {
+            requestHistory[requestNum][j] = readInt();
+        }
+        int x1 = requestHistory[requestNum][2];
+        int y1 = requestHistory[requestNum][1];
+        int x2 = requestHistory[requestNum][4];
+        int y2 = requestHistory[requestNum][3];
+
+        boolean sumResultExists = isSumResultExists(requestHistory, requestNum, sumResults);
+        if (!sumResultExists) {
+            long result = 0;
+            for (; x1 <= x2; x1++) {
+                result += sumLine(matrix[x1], y1, y2);
+            }
+            sumResults[requestNum] = result;
+        }
+    }
+
+    private static boolean isSumResultExists(int[][] requestHistory, int requestNum, long[] sumResults) {
+        boolean result = false;
+        for (int j = requestNum - 1; j > 0; j--) {
+            if (requestHistory[j][0] == 1) {
+                if (Arrays.equals(requestHistory[requestNum], requestHistory[j])) {
+                    sumResults[requestNum] = sumResults[j];
+                    result = true;
+                    break;
+                }
+            } else if (isMatrixModified(requestHistory[j], requestHistory[requestNum])) {
+                break;
+            }
         }
         return result;
     }
@@ -66,7 +70,10 @@ public class Main {
         return result;
     }
 
-    private static void modify(int[][] matrix, int[] requestParams) {
+    private static void modify(int[][] matrix, int[] requestParams) throws IOException {
+        for (int j = 1; j < 4; j++) {
+            requestParams[j] = readInt();
+        }
         int x = requestParams[2];
         int y = requestParams[1];
         int value = requestParams[3];
@@ -90,7 +97,7 @@ public class Main {
         return negative ? result * -1 : result;
     }
 
-    private static boolean contains(int[] modifyParams, int[] sumParams) {
+    private static boolean isMatrixModified(int[] modifyParams, int[] sumParams) {
         int x1 = sumParams[2];
         int y1 = sumParams[1];
         int x2 = sumParams[4];
