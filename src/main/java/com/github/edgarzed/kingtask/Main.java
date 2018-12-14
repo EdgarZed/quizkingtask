@@ -42,7 +42,7 @@ public class Main {
                 }
             }
         }
-        return lastSumRequest + 1;
+        return lastSumRequest > 0 ? lastSumRequest+1 : 0;
     }
 
     private static void sum(int[][] matrix, int[][] requestHistory, int requestNum, long[] sumResults) {
