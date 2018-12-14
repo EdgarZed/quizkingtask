@@ -1,64 +1,95 @@
 package com.github.edgarzed.kingtask;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 public class Main {
-
-    public static void main(String[] args) throws IOException {
-
+    public static void main(String[] args) throws Exception {
         int size = readInt();
         int[][] matrix = new int[size][size];
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
-                matrix[j][i] = readInt();
+                matrix[i][j] = readInt();
             }
         }
-        long[][] computedMatrix = computeSATMatrix(matrix);
 
-        /*for (int i = 0; i < size; i++) {
-            for (int j = 0; j < size; j++) {
-                System.out.print(matrix[j][i] + " ");
-            }
-            System.out.println();
-        }
-        System.out.println("***");
-        for (int i = 0; i < size; i++) {
-            for (int j = 0; j < size; j++) {
-                System.out.print(computedMatrix[j][i] + " ");
-            }
-            System.out.println();
-        }*/
+        int[][] requests = new int[readInt()][5];
+        int lastSumRequest = getLastSumRequestAndFillMatrix(requests);
+        long[] sumResults = new long[requests.length];
 
-        int[][] requests = getRequests();
-        int lastRequestType = 1;
-        for (int i = 0; i < requests.length; i++) {
+        for (int i = 0; i < lastSumRequest; i++) {
             if (requests[i][0] == 1) {
-                if (lastRequestType == 2) {
-                    computedMatrix = computeSATMatrix(matrix);
-                }
-                System.out.println(calculateArea(computedMatrix, requests[i][1], requests[i][2], requests[i][3], requests[i][4]));
-            } else {
-                matrix[requests[i][2]][requests[i][1]] = requests[i][3];
+                sum(matrix, requests, i, sumResults);
+                System.out.println(sumResults[i]);
+            } else if (requests[i][0] == 2) {
+                modify(matrix, requests[i]);
             }
-            lastRequestType = requests[i][0];
         }
     }
 
-    private static int[][] getRequests() throws IOException {
-        int[][] requests = new int[readInt()][5];
+    private static int getLastSumRequestAndFillMatrix(int[][] requests) throws IOException {
+        int lastSumRequest = 0;
         for (int i = 0; i < requests.length; i++) {
             requests[i][0] = readInt();
             if (requests[i][0] == 1) {
                 for (int j = 1; j < 5; j++) {
                     requests[i][j] = readInt();
                 }
+                lastSumRequest = i;
             } else {
                 for (int j = 1; j < 4; j++) {
                     requests[i][j] = readInt();
                 }
             }
         }
-        return requests;
+        return lastSumRequest + 1;
+    }
+
+    private static void sum(int[][] matrix, int[][] requestHistory, int requestNum, long[] sumResults) {
+        int x1 = requestHistory[requestNum][2];
+        int y1 = requestHistory[requestNum][1];
+        int x2 = requestHistory[requestNum][4];
+        int y2 = requestHistory[requestNum][3];
+
+        boolean sumResultExists = isSumResultExists(requestHistory, requestNum, sumResults);
+        if (!sumResultExists) {
+            long result = 0;
+            for (; x1 <= x2; x1++) {
+                result += sumLine(matrix[x1], y1, y2);
+            }
+            sumResults[requestNum] = result;
+        }
+    }
+
+    private static boolean isSumResultExists(int[][] requestHistory, int requestNum, long[] sumResults) {
+        boolean result = false;
+        for (int j = requestNum - 1; j > 0; j--) {
+            if (requestHistory[j][0] == 1) {
+                if (Arrays.equals(requestHistory[requestNum], requestHistory[j])) {
+                    sumResults[requestNum] = sumResults[j];
+                    result = true;
+                    break;
+                }
+            } else if (isMatrixModified(requestHistory[j], requestHistory[requestNum])) {
+                break;
+            }
+        }
+        return result;
+    }
+
+    private static long sumLine(int[] line, int y1, int y2) {
+        long result = 0;
+        for (; y1 <= y2; y1++) {
+            result += line[y1];
+        }
+        return result;
+    }
+
+    private static void modify(int[][] matrix, int[] requestParams) {
+        int x = requestParams[2];
+        int y = requestParams[1];
+        int value = requestParams[3];
+        matrix[x][y] = value;
     }
 
     private static int readInt() throws IOException {
@@ -78,43 +109,13 @@ public class Main {
         return negative ? result * -1 : result;
     }
 
-    static long calculateArea(long[][] computedMatrix, int x1,
-                              int y1, int x2, int y2) {
-
-        long res = computedMatrix[x2][y2];
-
-        if (x1 > 0) {
-            res = res - computedMatrix[x1 - 1][y2];
-        }
-        if (y1 > 0) {
-            res = res - computedMatrix[x2][y1 - 1];
-        }
-        if (x1 > 0 && y1 > 0) {
-            res = res + computedMatrix[x1 - 1][y1 - 1];
-        }
-
-        return res;
-    }
-
-    private static long[][] computeSATMatrix(int[][] matrix) {
-        int rowSize = matrix.length;
-        int colSize = matrix[0].length;
-        long[][] result = new long[rowSize][colSize];
-        for (int i = 0; i < rowSize; i++) {
-            for (int j = 0; j < colSize; j++) {
-                result[i][j] = getSubmatrixSum(i, j, matrix);
-            }
-        }
-        return result;
-    }
-
-    private static long getSubmatrixSum(int row, int col, int[][] matrix) {
-        long sum = 0;
-        for (int i = 0; i <= row; i++) {
-            for (int j = 0; j <= col; j++) {
-                sum += matrix[i][j];
-            }
-        }
-        return sum;
+    private static boolean isMatrixModified(int[] modifyParams, int[] sumParams) {
+        int x1 = sumParams[2];
+        int y1 = sumParams[1];
+        int x2 = sumParams[4];
+        int y2 = sumParams[3];
+        int x = modifyParams[2];
+        int y = modifyParams[1];
+        return x1 <= x && x <= x2 && y1 <= y && y <= y2;
     }
 }
