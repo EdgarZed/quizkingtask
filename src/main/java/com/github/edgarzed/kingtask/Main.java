@@ -21,25 +21,38 @@ public class Main {
             return;
         }
         int[][] requests = new int[requestsAmt][5];
-        int lastSumRequest = getLastSumRequestAndFillMatrix(requests);
-        int lastRequestType = 1;
+        int[] requestsMeta = getRequestsMetaAndFillMatrix(requests);
 
-        for (int i = 0; i < lastSumRequest; i++) {
-            if (requests[i][0] == 1) {
-                if (lastRequestType == 2) {
-                    computeSATMatrix(matrix, satMatrix);
+        if (requestsMeta[2] == 0 || requestsMeta[2] > 0 && requestsMeta[1] > requestsMeta[2] && (requestsMeta[1] / requestsMeta[2] > 100)) {
+            int lastRequestType = 1;
+            for (int i = 0; i < requestsMeta[0]; i++) {
+                if (requests[i][0] == 1) {
+                    if (lastRequestType == 2) {
+                        computeSATMatrix(matrix, satMatrix);
+                    }
+                    long result = calculateArea(satMatrix, requests[i][1], requests[i][2], requests[i][3], requests[i][4]);
+                    System.out.println(result);
+                } else if (requests[i][0] == 2) {
+                    matrix[requests[i][1]][requests[i][2]] = requests[i][3];
                 }
-                long result = calculateArea(satMatrix, requests[i][1], requests[i][2], requests[i][3], requests[i][4]);
-                System.out.println(result);
-            } else if (requests[i][0] == 2) {
-                matrix[requests[i][1]][requests[i][2]] = requests[i][3];
+                lastRequestType = requests[i][0];
             }
-            lastRequestType = requests[i][0];
+        } else {
+            for (int i = 0; i < requestsMeta[0]; i++) {
+                if (requests[i][0] == 1) {
+                    System.out.println(sum(matrix, requests[i]));
+                } else if (requests[i][0] == 2) {
+                    matrix[requests[i][1]][requests[i][2]] = requests[i][3];
+                }
+            }
         }
     }
 
-    private static int getLastSumRequestAndFillMatrix(int[][] requests) throws IOException {
+    private static int[] getRequestsMetaAndFillMatrix(int[][] requests) throws IOException {
+        int[] requestsMeta = new int[3];
         int lastSumRequest = 0;
+        int sumRequestsAmt = 0;
+        int modifyRequestsAmt = 0;
         for (int i = 0; i < requests.length; i++) {
             requests[i][0] = readInt();
             if (requests[i][0] == 1) {
@@ -47,13 +60,39 @@ public class Main {
                     requests[i][j] = readInt();
                 }
                 lastSumRequest = i;
+                sumRequestsAmt++;
             } else {
                 for (int j = 1; j < 4; j++) {
                     requests[i][j] = readInt();
                 }
+                modifyRequestsAmt++;
             }
         }
-        return lastSumRequest > 0 ? lastSumRequest + 1 : 1;
+        requestsMeta[0] = lastSumRequest > 0 ? lastSumRequest + 1 : 1;
+        requestsMeta[1] = sumRequestsAmt;
+        requestsMeta[2] = modifyRequestsAmt;
+        return requestsMeta;
+    }
+
+    private static long sum(int[][] matrix, int[] requestHistory) {
+        int x1 = requestHistory[1];
+        int y1 = requestHistory[2];
+        int x2 = requestHistory[3];
+        int y2 = requestHistory[4];
+
+        long result = 0;
+        for (; x1 <= x2; x1++) {
+            result += sumLine(matrix[x1], y1, y2);
+        }
+        return result;
+    }
+
+    private static long sumLine(int[] line, int y1, int y2) {
+        long result = 0;
+        for (; y1 <= y2; y1++) {
+            result += line[y1];
+        }
+        return result;
     }
 
     private static int readInt() throws IOException {
@@ -73,7 +112,7 @@ public class Main {
         return negative ? result * -1 : result;
     }
 
-    static long calculateArea(long[][] computedMatrix, int x1,
+    private static long calculateArea(long[][] computedMatrix, int x1,
                               int y1, int x2, int y2) {
 
         long res = computedMatrix[x2][y2];
