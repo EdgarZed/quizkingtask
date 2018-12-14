@@ -14,18 +14,20 @@ public class Main {
             }
         }
 
-        computeSATMatrix(matrix, satMatrix, 0);
+        computeSATMatrix(matrix, satMatrix);
 
-        int[][] requests = new int[readInt()][5];
+        int requestsAmt = readInt();
+        if (requestsAmt == 0) {
+            return;
+        }
+        int[][] requests = new int[requestsAmt][5];
         int lastSumRequest = getLastSumRequestAndFillMatrix(requests);
         int lastRequestType = 1;
 
         for (int i = 0; i < lastSumRequest; i++) {
             if (requests[i][0] == 1) {
                 if (lastRequestType == 2) {
-                    int start = requests[i - 1][1] < requests[i - 1][2] ? requests[i - 1][1] : requests[i - 1][2];
-                    start = start > 0 ? start - 1 : start;
-                    computeSATMatrix(matrix, satMatrix, start);
+                    computeSATMatrix(matrix, satMatrix);
                 }
                 long result = calculateArea(satMatrix, requests[i][1], requests[i][2], requests[i][3], requests[i][4]);
                 System.out.println(result);
@@ -51,7 +53,7 @@ public class Main {
                 }
             }
         }
-        return lastSumRequest > 0 ? lastSumRequest + 1 : 0;
+        return lastSumRequest > 0 ? lastSumRequest + 1 : 1;
     }
 
     private static int readInt() throws IOException {
@@ -89,9 +91,9 @@ public class Main {
         return res;
     }
 
-    private static void computeSATMatrix(int[][] matrix, long[][] computedMatrix, int start) {
-        for (int x = start; x < matrix.length; x++) {
-            for (int y = start; y < matrix.length; y++) {
+    private static void computeSATMatrix(int[][] matrix, long[][] computedMatrix) {
+        for (int x = 0; x < matrix.length; x++) {
+            for (int y = 0; y < matrix.length; y++) {
                 if (x > 0 && y > 0) {
                     computedMatrix[x][y] = matrix[x][y] + computedMatrix[x - 1][y] + computedMatrix[x][y - 1] - computedMatrix[x - 1][y - 1];
                 } else if (x > 0) {

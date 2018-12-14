@@ -52,6 +52,18 @@ public class MainTest {
     }
 
     @Test
+    public void two() throws Exception {
+        String data = "1\n"+
+                "15231109\n"+
+                "1\n"+
+                "1 0 0 0 0";
+        System.setOut(new PrintStream(outContent));
+        System.setIn(new ByteArrayInputStream(data.getBytes()));
+        Main.main(null);
+        assertEquals("15231109\r\n", outContent.toString());
+    }
+
+    @Test
     public void three() throws Exception {
         String data = "1\n"+
                 "20557091\n"+
