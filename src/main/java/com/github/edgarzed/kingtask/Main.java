@@ -1,7 +1,6 @@
 package com.github.edgarzed.kingtask;
 
 import java.io.IOException;
-import java.util.Arrays;
 
 public class Main {
     public static void main(String[] args) throws Exception {
@@ -42,7 +41,7 @@ public class Main {
                 }
             }
         }
-        return lastSumRequest > 0 ? lastSumRequest+1 : 0;
+        return lastSumRequest > 0 ? lastSumRequest + 1 : 0;
     }
 
     private static void sum(int[][] matrix, int[][] requestHistory, int requestNum, long[] sumResults) {
@@ -51,30 +50,12 @@ public class Main {
         int x2 = requestHistory[requestNum][4];
         int y2 = requestHistory[requestNum][3];
 
-        boolean sumResultExists = isSumResultExists(requestHistory, requestNum, sumResults);
-        if (!sumResultExists) {
-            long result = 0;
-            for (; x1 <= x2; x1++) {
-                result += sumLine(matrix[x1], y1, y2);
-            }
-            sumResults[requestNum] = result;
+        long result = 0;
+        for (; x1 <= x2; x1++) {
+            result += sumLine(matrix[x1], y1, y2);
         }
-    }
+        sumResults[requestNum] = result;
 
-    private static boolean isSumResultExists(int[][] requestHistory, int requestNum, long[] sumResults) {
-        boolean result = false;
-        for (int j = requestNum - 1; j > 0; j--) {
-            if (requestHistory[j][0] == 1) {
-                if (Arrays.equals(requestHistory[requestNum], requestHistory[j])) {
-                    sumResults[requestNum] = sumResults[j];
-                    result = true;
-                    break;
-                }
-            } else if (isMatrixModified(requestHistory[j], requestHistory[requestNum])) {
-                break;
-            }
-        }
-        return result;
     }
 
     private static long sumLine(int[] line, int y1, int y2) {
@@ -107,15 +88,5 @@ public class Main {
             }
         }
         return negative ? result * -1 : result;
-    }
-
-    private static boolean isMatrixModified(int[] modifyParams, int[] sumParams) {
-        int x1 = sumParams[2];
-        int y1 = sumParams[1];
-        int x2 = sumParams[4];
-        int y2 = sumParams[3];
-        int x = modifyParams[2];
-        int y = modifyParams[1];
-        return x1 <= x && x <= x2 && y1 <= y && y <= y2;
     }
 }
