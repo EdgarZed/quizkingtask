@@ -1,8 +1,11 @@
 package com.github.edgarzed.kingtask;
 
 import java.io.IOException;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 public class Main {
+    private static final BlockingQueue<int[]> QUEUE = new LinkedBlockingQueue<>();
 
     public static void main(String[] args) throws Exception {
         int size = readInt();
@@ -14,19 +17,17 @@ public class Main {
         if (requestsAmt == 0) {
             return;
         }
-        int[] request = new int[5];
+
+        Thread workerThread = new Thread(new LittleWorker(requestsAmt, matrix, sat));
+        workerThread.start();
 
         for (int i = 0; i < requestsAmt; i++) {
+            int[] request = new int[5];
             fillRequestData(request);
-            if (request[0] == 1) {
-                System.out.println(calculateSum(sat, request));
-            } else {
-                int x = request[1];
-                int y = request[2];
-                matrix[x][y] = request[3];
-                calcSat(matrix, sat, x, y);
-            }
+            QUEUE.add(request);
         }
+
+        workerThread.join();
     }
 
     private static void fillMatrixAndSAT(int[][] matrix, long[][] sat) throws IOException {
@@ -107,5 +108,37 @@ public class Main {
         }
 
         return res;
+    }
+
+    private static class LittleWorker implements Runnable {
+
+        private int requestsAmt;
+        private int[][] matrix;
+        private long[][] sat;
+
+        private LittleWorker(int requestsAmt, int[][] matrix, long[][] sat) {
+            this.requestsAmt = requestsAmt;
+            this.matrix = matrix;
+            this.sat = sat;
+        }
+
+        @Override
+        public void run() {
+            for (int i = 0; i < requestsAmt; i++) {
+                try {
+                    int[] requestData = QUEUE.take();
+                    if (requestData[0] == 1) {
+                        System.out.println(calculateSum(sat, requestData));
+                    } else {
+                        int x = requestData[1];
+                        int y = requestData[2];
+                        matrix[x][y] = requestData[3];
+                        calcSat(matrix, sat, x, y);
+                    }
+                } catch (InterruptedException e) {
+                    break;
+                }
+            }
+        }
     }
 }
