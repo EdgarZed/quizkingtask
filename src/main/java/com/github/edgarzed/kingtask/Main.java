@@ -14,16 +14,16 @@ public class Main {
         if (requestsAmt == 0) {
             return;
         }
-        int[][] requests = new int[requestsAmt][5];
-        int lastSumRequest = getLastSumRequestAndFillRequests(requests);
+        int[] request = new int[5];
 
-        for (int i = 0; i < lastSumRequest; i++) {
-            if (requests[i][0] == 1) {
-                System.out.println(calculateSum(sat, requests[i]));
+        for (int i = 0; i < requestsAmt; i++) {
+            fillRequestData(request);
+            if (request[0] == 1) {
+                System.out.println(calculateSum(sat, request));
             } else {
-                int x = requests[i][1];
-                int y = requests[i][2];
-                matrix[x][y] = requests[i][3];
+                int x = request[1];
+                int y = request[2];
+                matrix[x][y] = request[3];
                 calcSat(matrix, sat, x, y);
             }
         }
@@ -58,22 +58,17 @@ public class Main {
         }
     }
 
-    private static int getLastSumRequestAndFillRequests(int[][] requests) throws IOException {
-        int lastSumRequest = 0;
-        for (int i = 0; i < requests.length; i++) {
-            requests[i][0] = readInt();
-            if (requests[i][0] == 1) {
-                for (int j = 1; j < 5; j++) {
-                    requests[i][j] = readInt();
-                }
-                lastSumRequest = i;
-            } else {
-                for (int j = 1; j < 4; j++) {
-                    requests[i][j] = readInt();
-                }
+    private static void fillRequestData(int[] request) throws Exception {
+        request[0] = readInt();
+        if (request[0] == 1) {
+            for (int j = 1; j < 5; j++) {
+                request[j] = readInt();
+            }
+        } else {
+            for (int j = 1; j < 4; j++) {
+                request[j] = readInt();
             }
         }
-        return lastSumRequest > 0 ? lastSumRequest + 1 : 1;
     }
 
     private static int readInt() throws IOException {
