@@ -1,10 +1,10 @@
 package com.github.edgarzed.kingtask;
 
-import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 public class Main {
-    private static final BlockingQueue<int[]> QUEUE = new ArrayBlockingQueue<>(50);
+    private static final BlockingQueue<int[]> QUEUE = new LinkedBlockingQueue<>();
 
     public static void main(String[] args) throws Exception {
 
@@ -23,10 +23,10 @@ public class Main {
         Thread workerThread = new Thread(new LittleWorker(requestsAmt, matrix));
         workerThread.start();
 
-        int[][] requests = new int[requestsAmt][5];
         for (int i = 0; i < requestsAmt; i++) {
-            fillRequestData(requests[i]);
-            QUEUE.add(requests[i]);
+            int[] request = new int[5];
+            fillRequestData(request);
+            QUEUE.add(request);
         }
 
         workerThread.join();
