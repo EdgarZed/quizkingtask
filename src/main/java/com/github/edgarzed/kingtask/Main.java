@@ -14,16 +14,15 @@ public class Main {
             }
         }
 
-        computeSATMatrix(matrix, satMatrix);
-
         int requestsAmt = readInt();
         if (requestsAmt == 0) {
             return;
         }
         int[][] requests = new int[requestsAmt][5];
-        int[] requestsMeta = getRequestsMetaAndFillMatrix(requests);
+        int[] requestsMeta = getRequestsMeta(requests);
 
-        if (requestsMeta[2] == 0 || requestsMeta[2] > 0 && requestsMeta[1] > requestsMeta[2] && (requestsMeta[1] / requestsMeta[2] > 100)) {
+        if (requestsMeta[2] == 0 || requestsMeta[2] > 0 && requestsMeta[1] > requestsMeta[2] && (requestsMeta[1] / requestsMeta[2] > 70)) {
+            computeSATMatrix(matrix, satMatrix);
             int lastRequestType = 1;
             for (int i = 0; i < requestsMeta[0]; i++) {
                 if (requests[i][0] == 1) {
@@ -48,7 +47,7 @@ public class Main {
         }
     }
 
-    private static int[] getRequestsMetaAndFillMatrix(int[][] requests) throws IOException {
+    private static int[] getRequestsMeta(int[][] requests) throws IOException {
         int[] requestsMeta = new int[3];
         int lastSumRequest = 0;
         int sumRequestsAmt = 0;
