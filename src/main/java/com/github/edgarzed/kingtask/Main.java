@@ -1,16 +1,13 @@
 package com.github.edgarzed.kingtask;
 
-import java.util.ArrayList;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 
 public class Main {
+    private static final BlockingQueue<int[]> QUEUE = new ArrayBlockingQueue<>(50);
 
     public static void main(String[] args) throws Exception {
-        ExecutorService executorService = Executors.newCachedThreadPool();
-        ArrayList<Future<ArrayList<Long>>> futures = new ArrayList<>();
+
         int size = readInt();
         int[][] matrix = new int[size][size];
         for (int i = 0; i < size; i++) {
@@ -23,33 +20,16 @@ public class Main {
         if (requestsAmt == 0) {
             return;
         }
+        Thread workerThread = new Thread(new LittleWorker(requestsAmt, matrix));
+        workerThread.start();
+
         int[][] requests = new int[requestsAmt][5];
-        int lastModifyRequest = 0;
         for (int i = 0; i < requestsAmt; i++) {
             fillRequestData(requests[i]);
-            if (requests[i][0] == 2) {
-                SumTask sumTask = new SumTask(matrix, requests, lastModifyRequest, i);
-                Future<ArrayList<Long>> future = executorService.submit(sumTask);
-                futures.add(future);
-                int[][] modifiedMatrix = new int[size][size];
-                //??? requests corners
-                for (int j = 0; j < size; j++) {
-                    System.arraycopy(matrix[j], 0, modifiedMatrix[j], 0, size);
-                }
-                modifiedMatrix[requests[i][1]][requests[i][2]] = requests[i][3];
-                matrix = modifiedMatrix;
-                lastModifyRequest = i+1;
-            }
+            QUEUE.add(requests[i]);
         }
-        SumTask sumTask = new SumTask(matrix, requests, lastModifyRequest, requestsAmt);
-        Future<ArrayList<Long>> future = executorService.submit(sumTask);
-        futures.add(future);
-        for (Future<ArrayList<Long>> sumFuture : futures) {
-            ArrayList<Long> results = sumFuture.get();
-            for (long result : results) {
-                System.out.println(result);
-            }
-        }
+
+        workerThread.join();
     }
 
     private static void fillRequestData(int[] request) throws Exception {
@@ -82,30 +62,33 @@ public class Main {
         return negative ? result * -1 : result;
     }
 
-    private static class SumTask implements Callable<ArrayList<Long>> {
+    private static class LittleWorker implements Runnable {
 
+        private int requestsAmt;
         private int[][] matrix;
-        private int[][] requests;
-        private int startRequestIndex;
-        private int endRequestIndex;
 
-        private SumTask(int[][] matrix, int[][] requests, int startRequestIndex, int endRequestIndex) {
+        private LittleWorker(int requestsAmt, int[][] matrix) {
+            this.requestsAmt = requestsAmt;
             this.matrix = matrix;
-            this.requests = requests;
-            this.startRequestIndex = startRequestIndex;
-            this.endRequestIndex = endRequestIndex;
         }
 
         @Override
-        public ArrayList<Long> call() {
-            ArrayList<Long> results = new ArrayList<>(endRequestIndex-startRequestIndex+1);
-            for (int i = startRequestIndex; i < endRequestIndex; i++) {
-                results.add(sum(matrix, requests[i]));
+        public void run() {
+            for (int i = 0; i < requestsAmt; i++) {
+                try {
+                    int[] requestData = QUEUE.take();
+                    if (requestData[0] == 1) {
+                        System.out.println(sum(requestData));
+                    } else if (requestData[0] == 2) {
+                        matrix[requestData[1]][requestData[2]] = requestData[3];
+                    }
+                } catch (InterruptedException e) {
+                    break;
+                }
             }
-            return results;
         }
 
-        private long sum(int[][] matrix, int[] requestData) {
+        private long sum(int[] requestData) {
             int x1 = requestData[1];
             int y1 = requestData[2];
             int x2 = requestData[3];
