@@ -33,7 +33,6 @@ public class Main {
                         sumMatrix[x][j] = value;
                     }
                 }
-                calculatedLines[x] = true;
             }
         }
     }
