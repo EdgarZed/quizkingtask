@@ -1,10 +1,14 @@
 package com.github.edgarzed.kingtask;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Main {
+    private static Map<Integer, Integer> modifiedLines = new HashMap<>();
 
     public static void main(String[] args) throws Exception {
+
         int size = readInt();
         int[][] matrix = new int[size][size];
         long[][] sumMatrix = new long[size][size];
@@ -14,45 +18,32 @@ public class Main {
         if (requestsAmt == 0) {
             return;
         }
-        int[][] requests = new int[requestsAmt][5];
-        int lastSumRequest = getLastSumRequestAndFillRequests(requests);
+        int[] request = new int[5];
 
-        for (int i = 0; i < lastSumRequest; i++) {
-            if (requests[i][0] == 1) {
-                System.out.println(calculateSum(sumMatrix, requests[i]));
+        for (int i = 0; i < requestsAmt; i++) {
+            fillRequestData(request);
+            if (request[0] == 1) {
+                System.out.println(calculateSum(matrix, sumMatrix, request));
             } else {
-                int y = requests[i][1];
-                int x = requests[i][2];
-                matrix[x][y] = requests[i][3];
-                for (int j = y; j < size; j++) {
-                    int value = matrix[x][j];
-                    if (j > 0) {
-                        sumMatrix[x][j] = sumMatrix[x][j - 1] + value;
-                    } else {
-                        sumMatrix[x][j] = value;
-                    }
-                }
+                int y = request[1];
+                int x = request[2];
+                matrix[x][y] = request[3];
+                modifiedLines.merge(x, y, (oldVal, newVal) -> oldVal < newVal ? oldVal : newVal);
             }
         }
     }
 
-    private static int getLastSumRequestAndFillRequests(int[][] requests) throws IOException {
-        int lastSumRequest = 0;
-        for (int i = 0; i < requests.length; i++) {
-            requests[i][0] = readInt();
-            if (requests[i][0] == 1) {
-                for (int j = 1; j < 5; j++) {
-                    requests[i][j] = readInt();
-                }
-                lastSumRequest = i;
+    private static void calcSumLine(int[][] matrix, long[][] sumMatrix, int line, int index) {
+        for (; index < matrix.length; index++) {
+            int value = matrix[line][index];
+            if (index > 0) {
+                sumMatrix[line][index] = sumMatrix[line][index - 1] + value;
             } else {
-                for (int j = 1; j < 4; j++) {
-                    requests[i][j] = readInt();
-                }
+                sumMatrix[line][index] = value;
             }
         }
-        return lastSumRequest > 0 ? lastSumRequest + 1 : 1;
     }
+
     private static void fillMatrixAndSum(int[][] matrix, long[][] sumMatrix) throws IOException {
         for (int i = 0; i < matrix.length; i++) {
             for (int j = 0; j < matrix.length; j++) {
@@ -63,6 +54,19 @@ public class Main {
                 } else {
                     sumMatrix[i][j] = value;
                 }
+            }
+        }
+    }
+
+    private static void fillRequestData(int[] request) throws Exception {
+        request[0] = readInt();
+        if (request[0] == 1) {
+            for (int j = 1; j < 5; j++) {
+                request[j] = readInt();
+            }
+        } else {
+            for (int j = 1; j < 4; j++) {
+                request[j] = readInt();
             }
         }
     }
@@ -84,7 +88,7 @@ public class Main {
         return negative ? result * -1 : result;
     }
 
-    private static long calculateSum(long[][] sumMatrix, int[] request) {
+    private static long calculateSum(int[][] matrix, long[][] sumMatrix, int[] request) {
         int y1 = request[1];
         int x1 = request[2];
         int y2 = request[3];
@@ -92,6 +96,11 @@ public class Main {
 
         long res = 0;
         for (int i = x1; i <= x2; i++) {
+            Integer startModifyIndex = modifiedLines.get(i);
+            if (startModifyIndex != null) {
+                calcSumLine(matrix, sumMatrix, i, startModifyIndex);
+                modifiedLines.remove(i);
+            }
             if (y1 > 0) {
                 res += sumMatrix[i][y2] - sumMatrix[i][y1 - 1];
             } else {
