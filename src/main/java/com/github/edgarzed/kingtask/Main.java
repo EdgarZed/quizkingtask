@@ -10,15 +10,15 @@ public class Main {
     public static void main(String[] args) throws Exception {
         int size = readInt();
         int[][] matrix = new int[size][size];
-        long[][] sat = new long[size][size];
-        fillMatrixAndSAT(matrix, sat);
+        long[][] sumMatrix = new long[size][size];
+        fillMatrixAndSum(matrix, sumMatrix);
 
         int requestsAmt = readInt();
         if (requestsAmt == 0) {
             return;
         }
 
-        Thread workerThread = new Thread(new LittleWorker(requestsAmt, matrix, sat));
+        Thread workerThread = new Thread(new LittleWorker(requestsAmt, matrix, sumMatrix));
         workerThread.start();
 
         for (int i = 0; i < requestsAmt; i++) {
@@ -30,32 +30,17 @@ public class Main {
         workerThread.join();
     }
 
-    private static void fillMatrixAndSAT(int[][] matrix, long[][] sat) throws IOException {
-        for (int y = 0; y < matrix.length; y++) {
-            for (int x = 0; x < matrix.length; x++) {
-                matrix[x][y] = readInt();
-                calcSatCell(matrix, sat, x, y);
+    private static void fillMatrixAndSum(int[][] matrix, long[][] sumMatrix) throws IOException {
+        for (int i = 0; i < matrix.length; i++) {
+            for (int j = 0; j < matrix.length; j++) {
+                int value = readInt();
+                matrix[i][j] = value;
+                if (j > 0) {
+                    sumMatrix[i][j] = sumMatrix[i][j - 1] + value;
+                } else {
+                    sumMatrix[i][j] = value;
+                }
             }
-        }
-    }
-
-    private static void calcSat(int[][] matrix, long[][] sat, int startX, int startY) {
-        for (int y = startY; y < matrix.length; y++) {
-            for (int x = startX; x < matrix.length; x++) {
-                calcSatCell(matrix, sat, x, y);
-            }
-        }
-    }
-
-    private static void calcSatCell(int[][] matrix, long[][] sat, int x, int y) {
-        if (x > 0 && y > 0) {
-            sat[x][y] = matrix[x][y] + sat[x - 1][y] + sat[x][y - 1] - sat[x - 1][y - 1];
-        } else if (x > 0) {
-            sat[x][y] = matrix[x][y] + sat[x - 1][y];
-        } else if (y > 0) {
-            sat[x][y] = matrix[x][y] + sat[x][y - 1];
-        } else {
-            sat[x][y] = matrix[x][y];
         }
     }
 
@@ -89,55 +74,57 @@ public class Main {
         return negative ? result * -1 : result;
     }
 
-    private static long calculateSum(long[][] satMatrix, int[] request) {
-        int x1 = request[1];
-        int y1 = request[2];
-        int x2 = request[3];
-        int y2 = request[4];
+    private static long calculateSum(long[][] sumMatrix, int[] request) {
+        int y1 = request[1];
+        int x1 = request[2];
+        int y2 = request[3];
+        int x2 = request[4];
 
-        long res = satMatrix[x2][y2];
-
-        if (x1 > 0) {
-            res = res - satMatrix[x1 - 1][y2];
+        long res = 0;
+        for (int i = x1; i <= x2; i++) {
+            if (y1 > 0) {
+                res += sumMatrix[i][y2] - sumMatrix[i][y1 - 1];
+            } else {
+                res += sumMatrix[i][y2];
+            }
         }
-        if (y1 > 0) {
-            res = res - satMatrix[x2][y1 - 1];
-        }
-        if (x1 > 0 && y1 > 0) {
-            res = res + satMatrix[x1 - 1][y1 - 1];
-        }
-
         return res;
     }
-
     private static class LittleWorker implements Runnable {
 
         private int requestsAmt;
         private int[][] matrix;
-        private long[][] sat;
+        private long[][] sumMatrix;
 
-        private LittleWorker(int requestsAmt, int[][] matrix, long[][] sat) {
+        private LittleWorker(int requestsAmt, int[][] matrix, long[][] sumMatrix) {
             this.requestsAmt = requestsAmt;
             this.matrix = matrix;
-            this.sat = sat;
+            this.sumMatrix = sumMatrix;
         }
 
         @Override
         public void run() {
-            for (int i = 0; i < requestsAmt; i++) {
-                try {
+            try {
+                for (int i = 0; i < requestsAmt; i++) {
                     int[] requestData = QUEUE.take();
                     if (requestData[0] == 1) {
-                        System.out.println(calculateSum(sat, requestData));
+                        System.out.println(calculateSum(sumMatrix, requestData));
                     } else {
-                        int x = requestData[1];
-                        int y = requestData[2];
+                        int y = requestData[1];
+                        int x = requestData[2];
                         matrix[x][y] = requestData[3];
-                        calcSat(matrix, sat, x, y);
+                        for (int j = y; j < matrix.length; j++) {
+                            int value = matrix[x][j];
+                            if (j > 0) {
+                                sumMatrix[x][j] = sumMatrix[x][j - 1] + value;
+                            } else {
+                                sumMatrix[x][j] = value;
+                            }
+                        }
                     }
-                } catch (InterruptedException e) {
-                    break;
                 }
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
             }
         }
     }
