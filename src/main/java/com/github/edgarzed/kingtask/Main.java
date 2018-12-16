@@ -1,11 +1,8 @@
 package com.github.edgarzed.kingtask;
 
 import java.io.IOException;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
 
 public class Main {
-    private static final BlockingQueue<int[]> QUEUE = new LinkedBlockingQueue<>();
 
     public static void main(String[] args) throws Exception {
         int size = readInt();
@@ -17,17 +14,26 @@ public class Main {
         if (requestsAmt == 0) {
             return;
         }
-
-        Thread workerThread = new Thread(new LittleWorker(requestsAmt, matrix, sumMatrix));
-        workerThread.start();
+        int[] request = new int[5];
 
         for (int i = 0; i < requestsAmt; i++) {
-            int[] request = new int[5];
             fillRequestData(request);
-            QUEUE.add(request);
+            if (request[0] == 1) {
+                System.out.println(calculateSum(sumMatrix, request));
+            } else {
+                int y = request[1];
+                int x = request[2];
+                matrix[x][y] = request[3];
+                for (int j = y; j < size; j++) {
+                    int value = matrix[x][j];
+                    if (j > 0) {
+                        sumMatrix[x][j] = sumMatrix[x][j - 1] + value;
+                    } else {
+                        sumMatrix[x][j] = value;
+                    }
+                }
+            }
         }
-
-        workerThread.join();
     }
 
     private static void fillMatrixAndSum(int[][] matrix, long[][] sumMatrix) throws IOException {
@@ -89,43 +95,5 @@ public class Main {
             }
         }
         return res;
-    }
-    private static class LittleWorker implements Runnable {
-
-        private int requestsAmt;
-        private int[][] matrix;
-        private long[][] sumMatrix;
-
-        private LittleWorker(int requestsAmt, int[][] matrix, long[][] sumMatrix) {
-            this.requestsAmt = requestsAmt;
-            this.matrix = matrix;
-            this.sumMatrix = sumMatrix;
-        }
-
-        @Override
-        public void run() {
-            try {
-                for (int i = 0; i < requestsAmt; i++) {
-                    int[] requestData = QUEUE.take();
-                    if (requestData[0] == 1) {
-                        System.out.println(calculateSum(sumMatrix, requestData));
-                    } else {
-                        int y = requestData[1];
-                        int x = requestData[2];
-                        matrix[x][y] = requestData[3];
-                        for (int j = y; j < matrix.length; j++) {
-                            int value = matrix[x][j];
-                            if (j > 0) {
-                                sumMatrix[x][j] = sumMatrix[x][j - 1] + value;
-                            } else {
-                                sumMatrix[x][j] = value;
-                            }
-                        }
-                    }
-                }
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-        }
     }
 }
