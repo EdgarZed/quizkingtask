@@ -18,20 +18,20 @@ public class Main {
             if (readInt() == 1) {
                 System.out.println(calculateSum(sumMatrix, readInt(), readInt(), readInt(), readInt()));
             } else {
-                int y = readInt();
-                int x = readInt();
-                int newValue = readInt();
-                for (int j = size - 1; j >= y; j--) {
-                    if (j > 0) {
-                        sumMatrix[x][j] = sumMatrix[x][j] - sumMatrix[x][j - 1];
-                    }
-                }
-                sumMatrix[x][y] = newValue;
-                for (int j = y; j < size; j++) {
-                    if (j > 0) {
-                        sumMatrix[x][j] = sumMatrix[x][j - 1] + sumMatrix[x][j];
-                    }
-                }
+                modify(sumMatrix, readInt(), readInt(), readInt());
+            }
+        }
+    }
+
+    private static void modify(long[][] sumMatrix, int y, int x, int newValue) {
+        long originalVal = y > 0 ? sumMatrix[x][y] - sumMatrix[x][y - 1] : sumMatrix[x][y];
+        long diff = originalVal - newValue;
+
+        for (int j = y; j < sumMatrix.length; j++) {
+            if (j > 0) {
+                sumMatrix[x][j] = sumMatrix[x][j] - diff;
+            } else {
+                sumMatrix[x][j] = newValue;
             }
         }
     }
@@ -78,3 +78,22 @@ public class Main {
         return res;
     }
 }
+
+/*Царь-задача
+Дана квадратная матрица A[0...N-1, 0...N-1]. Вашей программе могут поступать запросы двух типов:
+
+Вычислить сумму элементов подматрицы;
+Модифицировать отдельный элемент матрицы.
+Ваша задача обработать все запросы корректно и затратив на это как можно меньше процессорного времени.
+
+Входные данные
+Первая строка содержит целое число N (1 ⩽ N ⩽ 550) — размер матрицы.
+
+Далее следуют N строк по N целых чисел в каждой — Ai,j элементы матрицы, −108 ⩽ Ai,j ⩽ 108;0 ⩽ i,j < N.
+
+В следующей строке записано целое число Q — количество запросов, 0 ⩽ Q ⩽ 100100.
+
+Далее следует Q строк, каждая из которых представляет описание запроса в одном из двух форматов:
+
+Пять целых чисел разделенных пробелом K, X1, Y1, X2, Y2 — если запрос поиска суммы в подматрице A[X1...X2, Y1...Y2], 0 ⩽ X1 ⩽ X2; 0 ⩽ Y1 ⩽ Y2; X1 ⩽ X2 < N; Y1 ⩽ Y2 < N; K = 1;
+Четыре целых числа разделенных пробелом K, X, Y, P — если запрос модификации отдельного элемента матрицы (т.е. запрос вида A[X, Y] = P), 0 ⩽ X < N; 0 ⩽ Y < N; −108 ⩽ P ⩽ 108; K = 2.*/
