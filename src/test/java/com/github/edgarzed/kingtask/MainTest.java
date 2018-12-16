@@ -73,7 +73,7 @@ public class MainTest {
         Main.main(null);
         assertEquals("", outContent.toString());
     }
-    /*колонка строка колонка строка*/
+
     @Test
     public void five() throws Exception {
 
