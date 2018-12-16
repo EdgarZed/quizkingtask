@@ -14,16 +14,16 @@ public class Main {
         if (requestsAmt == 0) {
             return;
         }
-        int[] request = new int[5];
+        int[][] requests = new int[requestsAmt][5];
+        int lastSumRequest = getLastSumRequestAndFillRequests(requests);
 
-        for (int i = 0; i < requestsAmt; i++) {
-            fillRequestData(request);
-            if (request[0] == 1) {
-                System.out.println(calculateSum(sumMatrix, request));
+        for (int i = 0; i < lastSumRequest; i++) {
+            if (requests[i][0] == 1) {
+                System.out.println(calculateSum(sumMatrix, requests[i]));
             } else {
-                int y = request[1];
-                int x = request[2];
-                matrix[x][y] = request[3];
+                int y = requests[i][1];
+                int x = requests[i][2];
+                matrix[x][y] = requests[i][3];
                 for (int j = y; j < size; j++) {
                     int value = matrix[x][j];
                     if (j > 0) {
@@ -36,6 +36,23 @@ public class Main {
         }
     }
 
+    private static int getLastSumRequestAndFillRequests(int[][] requests) throws IOException {
+        int lastSumRequest = 0;
+        for (int i = 0; i < requests.length; i++) {
+            requests[i][0] = readInt();
+            if (requests[i][0] == 1) {
+                for (int j = 1; j < 5; j++) {
+                    requests[i][j] = readInt();
+                }
+                lastSumRequest = i;
+            } else {
+                for (int j = 1; j < 4; j++) {
+                    requests[i][j] = readInt();
+                }
+            }
+        }
+        return lastSumRequest > 0 ? lastSumRequest + 1 : 1;
+    }
     private static void fillMatrixAndSum(int[][] matrix, long[][] sumMatrix) throws IOException {
         for (int i = 0; i < matrix.length; i++) {
             for (int j = 0; j < matrix.length; j++) {
@@ -46,19 +63,6 @@ public class Main {
                 } else {
                     sumMatrix[i][j] = value;
                 }
-            }
-        }
-    }
-
-    private static void fillRequestData(int[] request) throws Exception {
-        request[0] = readInt();
-        if (request[0] == 1) {
-            for (int j = 1; j < 5; j++) {
-                request[j] = readInt();
-            }
-        } else {
-            for (int j = 1; j < 4; j++) {
-                request[j] = readInt();
             }
         }
     }
