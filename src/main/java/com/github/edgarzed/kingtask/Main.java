@@ -7,8 +7,7 @@ public class Main {
     public static void main(String[] args) throws Exception {
         int size = readInt();
         int[][] matrix = new int[size][size];
-        long[][] sumMatrix = new long[size][size];
-        boolean[] calculatedLines = new boolean[size];
+        long[][] sumMatrix = new long[size][size + 1];
         fillMatrix(matrix);
 
         int requestsAmt = readInt();
@@ -20,7 +19,7 @@ public class Main {
         for (int i = 0; i < requestsAmt; i++) {
             fillRequestData(request);
             if (request[0] == 1) {
-                System.out.println(calculateSum(matrix, sumMatrix, calculatedLines, request));
+                System.out.println(calculateSum(matrix, sumMatrix, request));
             } else {
                 int y = request[1];
                 int x = request[2];
@@ -75,7 +74,7 @@ public class Main {
         return negative ? result * -1 : result;
     }
 
-    private static void calculateSumLine(int[][] matrix, long[][] sumMatrix){
+    private static void calculateSumLine(int[][] matrix, long[][] sumMatrix) {
         for (int i = 0; i < matrix.length; i++) {
             for (int j = 0; j < matrix.length; j++) {
                 if (j > 0) {
@@ -87,7 +86,7 @@ public class Main {
         }
     }
 
-    private static long calculateSum(int[][] matrix, long[][] sumMatrix, boolean[] calculatedLines, int[] request) {
+    private static long calculateSum(int[][] matrix, long[][] sumMatrix, int[] request) {
         int y1 = request[1];
         int x1 = request[2];
         int y2 = request[3];
@@ -95,9 +94,9 @@ public class Main {
 
         long res = 0;
         for (int i = x1; i <= x2; i++) {
-            if (!calculatedLines[i]){
+            if (sumMatrix[i][matrix.length] == 0) {
                 calculateSumLine(matrix, sumMatrix);
-                calculatedLines[i] = true;
+                sumMatrix[i][matrix.length] = 1;
             }
             if (y1 > 0) {
                 res += sumMatrix[i][y2] - sumMatrix[i][y1 - 1];
